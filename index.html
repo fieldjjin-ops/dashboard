@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>율정중학교 교실 대시보드</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nanum+Gothic:wght@400;700;800&family=Black+Han+Sans&display=swap" rel="stylesheet">
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; }
+body {
+  font-family: 'Nanum Gothic', sans-serif;
+  background: #eef2ff;
+  color: #1a2540;
+  display: flex; flex-direction: column; min-height: 100vh;
+}
+
+/* 슬로건 바 */
+.slogan-bar {
+  background: linear-gradient(135deg, #1e40af 0%, #2563eb 60%, #60a5fa 100%);
+  padding: 22px 40px;
+  display: flex; align-items: center; justify-content: center; gap: 18px;
+  box-shadow: 0 6px 24px rgba(37,99,235,0.25);
+}
+.slogan-icon { font-size: 40px; }
+.slogan-text {
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: 38px; letter-spacing: 5px; color: #fff;
+  text-shadow: 0 2px 12px rgba(0,0,0,0.18);
+}
+.slogan-accent { color: #fde68a; }
+.school-badge {
+  background: rgba(255,255,255,0.22);
+  color: #dbeafe; font-size: 15px; font-weight: 800;
+  padding: 6px 16px; border-radius: 20px;
+  border: 1.5px solid rgba(255,255,255,0.35);
+  margin-left: 6px; letter-spacing: 1px;
+}
+
+/* 그리드 */
+.main-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.15fr;
+  grid-template-rows: auto auto auto;
+  gap: 16px; padding: 16px; flex: 1;
+}
+
+/* 카드 */
+.card {
+  background: #fff;
+  border-radius: 22px;
+  padding: 22px 24px;
+  box-shadow: 0 2px 16px rgba(37,99,235,0.07), 0 1px 3px rgba(37,99,235,0.05);
+  border: 1px solid #e0e9ff;
+}
+.card-header {
+  display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+}
+.card-icon-wrap {
+  width: 46px; height: 46px; border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24px; flex-shrink: 0;
+}
+.icon-blue   { background: #dbeafe; }
+.icon-green  { background: #dcfce7; }
+.icon-orange { background: #ffedd5; }
+.icon-purple { background: #ede9fe; }
+.icon-pink   { background: #fce7f3; }
+
+.card-title {
+  font-size: 13px; font-weight: 800;
+  letter-spacing: 1px; color: #94a3b8; text-transform: uppercase;
+}
+.api-badge {
+  margin-left: auto; font-size: 11px; font-weight: 800;
+  padding: 4px 12px; border-radius: 20px;
+}
+.badge-ok      { background: #dcfce7; color: #15803d; }
+.badge-err     { background: #fee2e2; color: #b91c1c; }
+.badge-loading { background: #dbeafe; color: #1d4ed8; }
+
+/* 시계 */
+.clock-card { grid-column: 1; }
+.clock-display {
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: 64px; color: #1e40af;
+  letter-spacing: -2px; line-height: 1;
+}
+.date-display { font-size: 15px; color: #94a3b8; margin-top: 10px; font-weight: 700; }
+.day-display  { font-size: 20px; color: #2563eb; margin-top: 5px; font-weight: 800; }
+
+/* 날씨 */
+.weather-card { grid-column: 2; }
+.weather-main { display: flex; align-items: center; gap: 18px; }
+.weather-emoji { font-size: 60px; line-height: 1; }
+.weather-temp {
+  font-family: 'Black Han Sans', sans-serif;
+  font-size: 54px; color: #1e40af; line-height: 1;
+}
+.weather-label { font-size: 15px; color: #64748b; margin-top: 6px; font-weight: 700; }
+.weather-details {
+  display: flex; margin-top: 16px;
+  padding-top: 14px; border-top: 1.5px solid #e8efff;
+}
+.weather-detail {
+  flex: 1; text-align: center;
+  font-size: 12px; color: #94a3b8; font-weight: 700;
+  border-right: 1.5px solid #e8efff;
+}
+.weather-detail:last-child { border-right: none; }
+.weather-detail span {
+  display: block; font-size: 18px; font-weight: 800;
+  color: #2563eb; margin-bottom: 3px;
+}
+
+/* 시간표 */
+.timetable-card { grid-column: 3; grid-row: 1 / 4; }
+.period-list { display: flex; flex-direction: column; gap: 8px; }
+.period-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 11px 14px; border-radius: 12px;
+  background: #f8faff; border: 1.5px solid #e0e9ff;
+}
+.period-item.current {
+  background: #eff6ff; border-color: #3b82f6;
+  box-shadow: 0 2px 10px rgba(59,130,246,0.15);
+}
+.period-num {
+  font-size: 13px; color: #cbd5e1; font-weight: 800;
+  min-width: 22px; text-align: center;
+}
+.period-item.current .period-num { color: #3b82f6; }
+.period-time { font-size: 11px; color: #b0bcd4; min-width: 72px; font-weight: 700; }
+.period-subject { font-size: 16px; color: #1e293b; font-weight: 800; flex: 1; }
+.period-item.current .period-subject { color: #1d4ed8; }
+.now-badge {
+  font-size: 10px; background: #2563eb; color: #fff;
+  padding: 3px 9px; border-radius: 10px; font-weight: 800;
+}
+
+/* 급식 */
+.lunch-card { grid-column: 1 / 3; }
+.menu-grid {
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
+}
+.menu-item {
+  background: #f8faff; border: 1.5px solid #e0e9ff;
+  border-radius: 14px; padding: 14px 8px; text-align: center;
+}
+.menu-emoji { font-size: 30px; display: block; margin-bottom: 7px; }
+.menu-name  { font-size: 12px; color: #334155; font-weight: 800; line-height: 1.4; }
+.no-data    { font-size: 14px; color: #94a3b8; text-align: center; padding: 22px 0; font-weight: 700; }
+.kcal-row   { grid-column: 1 / 6; text-align: right; font-size: 12px; color: #94a3b8; margin-top: 6px; font-weight: 700; }
+
+/* 행사 */
+.events-card { grid-column: 1 / 3; }
+.events-row  { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.event-item  {
+  background: #f8faff; border: 1.5px solid #e0e9ff;
+  border-radius: 16px; padding: 14px 16px;
+  display: flex; align-items: flex-start; gap: 12px;
+}
+.event-date-box {
+  background: #eff6ff; border: 2px solid #bfdbfe;
+  border-radius: 12px; padding: 6px 10px;
+  text-align: center; min-width: 50px; flex-shrink: 0;
+}
+.event-month { font-size: 10px; color: #3b82f6; text-transform: uppercase; font-weight: 800; letter-spacing: 0.5px; }
+.event-day   { font-size: 26px; color: #1e40af; font-weight: 800; line-height: 1.1; }
+.event-name  { font-size: 14px; color: #1e293b; font-weight: 800; line-height: 1.4; margin-top: 2px; }
+.event-detail{ font-size: 12px; color: #94a3b8; margin-top: 4px; font-weight: 700; }
+
+/* 태블릿 */
+@media (max-width: 768px) {
+  .slogan-bar { padding: 16px 20px; gap: 10px; }
+  .slogan-icon { font-size: 28px; }
+  .slogan-text { font-size: 26px; letter-spacing: 3px; }
+  .school-badge { font-size: 12px; padding: 4px 12px; }
+  .main-grid { grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
+  .clock-card    { grid-column: 1; grid-row: auto; }
+  .weather-card  { grid-column: 2; grid-row: auto; }
+  .timetable-card{ grid-column: 1 / 3; grid-row: auto; }
+  .lunch-card    { grid-column: 1 / 3; grid-row: auto; }
+  .events-card   { grid-column: 1 / 3; grid-row: auto; }
+  .clock-display { font-size: 46px; }
+  .weather-emoji { font-size: 44px; }
+  .weather-temp  { font-size: 40px; }
+  .menu-grid { grid-template-columns: repeat(4, 1fr); }
+  .kcal-row  { grid-column: 1 / 5; }
+  .events-row { grid-template-columns: repeat(2, 1fr); }
+}
+
+/* 스마트폰 */
+@media (max-width: 480px) {
+  .slogan-bar { padding: 14px 16px; gap: 8px; }
+  .slogan-icon { font-size: 22px; }
+  .slogan-text { font-size: 18px; letter-spacing: 2px; }
+  .school-badge { display: none; }
+  .main-grid { grid-template-columns: 1fr; gap: 10px; padding: 10px; }
+  .clock-card, .weather-card, .timetable-card,
+  .lunch-card, .events-card { grid-column: 1; grid-row: auto; }
+  .clock-display { font-size: 52px; }
+  .date-display  { font-size: 13px; }
+  .day-display   { font-size: 16px; }
+  .weather-emoji { font-size: 50px; }
+  .weather-temp  { font-size: 46px; }
+  .weather-label { font-size: 13px; }
+  .weather-detail span { font-size: 15px; }
+  .card { padding: 16px; border-radius: 16px; }
+  .card-icon-wrap { width: 38px; height: 38px; font-size: 20px; }
+  .card-title { font-size: 11px; }
+  .period-subject { font-size: 14px; }
+  .period-time    { min-width: 58px; font-size: 10px; }
+  .menu-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .kcal-row  { grid-column: 1 / 4; }
+  .menu-emoji { font-size: 24px; }
+  .menu-name  { font-size: 11px; }
+  .events-row { grid-template-columns: 1fr; gap: 8px; }
+}
+</style>
+</head>
+<body>
+
+<div class="slogan-bar">
+  <span class="slogan-icon">🏃</span>
+  <span class="slogan-text">다함께 <span class="slogan-accent">Run</span> &amp; <span class="slogan-accent">Learn</span>!</span>
+  <span class="school-badge">율정중학교</span>
+</div>
+
+<div class="main-grid">
+
+  <!-- 시계 -->
+  <div class="card clock-card">
+    <div class="card-header">
+      <div class="card-icon-wrap icon-blue">🕐</div>
+      <span class="card-title">현재 시각</span>
+    </div>
+    <div class="clock-display" id="clock">--:--:--</div>
+    <div class="date-display" id="date-disp"></div>
+    <div class="day-display"  id="day-disp"></div>
+  </div>
+
+  <!-- 날씨 -->
+  <div class="card weather-card">
+    <div class="card-header">
+      <div class="card-icon-wrap icon-blue">🌤️</div>
+      <span class="card-title">오늘 날씨 · 의정부</span>
+      <span class="api-badge badge-loading" id="w-badge">불러오는 중</span>
+    </div>
+    <div class="weather-main">
+      <span class="weather-emoji" id="w-emoji">⛅</span>
+      <div>
+        <div class="weather-temp" id="w-temp">--°C</div>
+        <div class="weather-label" id="w-desc">불러오는 중...</div>
+      </div>
+    </div>
+    <div class="weather-details">
+      <div class="weather-detail"><span id="w-hum">--%</span>습도</div>
+      <div class="weather-detail"><span id="w-wind">--</span>풍속</div>
+      <div class="weather-detail"><span id="w-feel">--°C</span>체감</div>
+    </div>
+  </div>
+
+  <!-- 시간표 -->
+  <div class="card timetable-card">
+    <div class="card-header">
+      <div class="card-icon-wrap icon-purple">📅</div>
+      <span class="card-title">시간표 · 1학년 1반</span>
+      <span class="api-badge badge-loading" id="tt-badge">불러오는 중</span>
+    </div>
+    <div class="period-list" id="periods">
+      <div class="no-data">불러오는 중...</div>
+    </div>
+  </div>
+
+  <!-- 급식 -->
+  <div class="card lunch-card">
+    <div class="card-header">
+      <div class="card-icon-wrap icon-orange">🍱</div>
+      <span class="card-title">오늘 점심 급식</span>
+      <span class="api-badge badge-loading" id="meal-badge">NEIS 연결 중</span>
+    </div>
+    <div id="menu-grid" class="menu-grid">
+      <div class="no-data" style="grid-column:1/6">불러오는 중...</div>
+    </div>
+  </div>
+
+  <!-- 행사 -->
+  <div class="card events-card">
+    <div class="card-header">
+      <div class="card-icon-wrap icon-pink">📢</div>
+      <span class="card-title">학교 행사 &amp; 교육 활동</span>
+    </div>
+    <div class="events-row" id="events-row"></div>
+  </div>
+
+</div>
+
+<script>
+const NEIS_KEY = '855871d3dd41467c871e11c442e6368c';
+const ATPT     = 'J10';
+const SCHUL    = '7602153';
+const GRADE    = '1';
+const CLASS_NM = '1';
+const DAYS     = ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'];
+
+const PERIOD_TIMES = [
+  {s:'08:40',e:'09:30'},{s:'09:40',e:'10:30'},{s:'10:40',e:'11:30'},
+  {s:'11:40',e:'12:30'},{s:'13:20',e:'14:10'},{s:'14:20',e:'15:10'},
+  {s:'15:20',e:'16:10'},
+];
+
+function updateClock() {
+  const now = new Date();
+  const pad = n => String(n).padStart(2,'0');
+  document.getElementById('clock').textContent =
+    pad(now.getHours())+':'+pad(now.getMinutes())+':'+pad(now.getSeconds());
+  document.getElementById('date-disp').textContent =
+    now.getFullYear()+'년 '+(now.getMonth()+1)+'월 '+now.getDate()+'일';
+  document.getElementById('day-disp').textContent = DAYS[now.getDay()];
+  highlightPeriod(now);
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+function highlightPeriod(now) {
+  const cur = now.getHours()*60 + now.getMinutes();
+  PERIOD_TIMES.forEach((t,i) => {
+    const el = document.getElementById('period-'+(i+1));
+    if (!el) return;
+    const [sh,sm] = t.s.split(':').map(Number);
+    const [eh,em] = t.e.split(':').map(Number);
+    const active = cur >= sh*60+sm && cur < eh*60+em;
+    el.className = 'period-item'+(active?' current':'');
+    const badge = el.querySelector('.now-badge');
+    if (active && !badge) {
+      const b = document.createElement('span');
+      b.className='now-badge'; b.textContent='진행중'; el.appendChild(b);
+    } else if (!active && badge) badge.remove();
+  });
+}
+
+function renderDefaultTimetable() {
+  document.getElementById('periods').innerHTML = PERIOD_TIMES.map((t,i)=>
+    `<div class="period-item" id="period-${i+1}">
+      <span class="period-num">${i+1}</span>
+      <span class="period-time">${t.s}~${t.e}</span>
+      <span class="period-subject" style="color:#cbd5e1">-</span>
+    </div>`).join('');
+}
+
+async function fetchTimetable() {
+  const now = new Date();
+  if (now.getDay()===0||now.getDay()===6) {
+    setBadge('tt-badge','주말','err'); renderDefaultTimetable(); return;
+  }
+  const ymd = now.getFullYear()+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0');
+  for (const cls of [CLASS_NM, CLASS_NM+'반']) {
+    try {
+      const url = `https://open.neis.go.kr/hub/misTimetable?KEY=${NEIS_KEY}&Type=json&pIndex=1&pSize=20`+
+        `&ATPT_OFCDC_SC_CODE=${ATPT}&SD_SCHUL_CODE=${SCHUL}&ALL_TI_YMD=${ymd}&GRADE=${GRADE}&CLASS_NM=${encodeURIComponent(cls)}`;
+      const data = await (await fetch(url)).json();
+      const rows = data?.misTimetable?.[1]?.row;
+      if (rows && rows.length) {
+        document.getElementById('periods').innerHTML = rows
+          .sort((a,b)=>parseInt(a.PERIO)-parseInt(b.PERIO))
+          .map(r=>{
+            const p=parseInt(r.PERIO), t=PERIOD_TIMES[p-1]||{s:'',e:''};
+            return `<div class="period-item" id="period-${p}">
+              <span class="period-num">${p}</span>
+              <span class="period-time">${t.s}~${t.e}</span>
+              <span class="period-subject">${r.ITRT_CNTNT}</span>
+            </div>`;
+          }).join('');
+        setBadge('tt-badge','NEIS 연결됨','ok');
+        highlightPeriod(new Date()); return;
+      }
+    } catch(e) { continue; }
+  }
+  renderDefaultTimetable(); setBadge('tt-badge','데이터 없음','err');
+}
+
+const EMOJI_MAP = {
+  '밥':'🍚','국':'🍲','찌개':'🍲','볶음':'🥘','무침':'🥗','나물':'🌿',
+  '구이':'🍖','튀김':'🍳','김치':'🥢','우유':'🥛','과일':'🍎',
+  '샐러드':'🥗','카레':'🍛','치킨':'🍗','돈가스':'🥩','면':'🍜','빵':'🍞',
+  '수프':'🥣','쌀':'🍚','된장':'🍲','오이':'🥒',
+};
+function getEmoji(n) {
+  for (const [k,v] of Object.entries(EMOJI_MAP)) { if(n.includes(k)) return v; }
+  return '🍽️';
+}
+
+async function fetchMeal() {
+  const now = new Date(), dow = now.getDay();
+  if (dow===0||dow===6) {
+    document.getElementById('menu-grid').innerHTML =
+      '<div class="no-data" style="grid-column:1/6">🍽️ 주말에는 급식이 없습니다</div>';
+    setBadge('meal-badge','주말','err'); return;
+  }
+  const ymd = now.getFullYear()+String(now.getMonth()+1).padStart(2,'0')+String(now.getDate()).padStart(2,'0');
+  try {
+    const url = `https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=${NEIS_KEY}&Type=json&pIndex=1&pSize=1`+
+      `&ATPT_OFCDC_SC_CODE=${ATPT}&SD_SCHUL_CODE=${SCHUL}&MLSV_YMD=${ymd}&MMEAL_SC_CODE=2`;
+    const data = await (await fetch(url)).json();
+    if (data?.RESULT?.CODE && data.RESULT.CODE!=='INFO-000') throw new Error();
+    const row = data?.mealServiceDietInfo?.[1]?.row?.[0];
+    const grid = document.getElementById('menu-grid');
+    if (row) {
+      const items = row.DDISH_NM.split('<br/>').map(s=>s.replace(/\([^)]*\)/g,'').trim()).filter(Boolean);
+      grid.innerHTML = items.map(name=>
+        `<div class="menu-item">
+          <span class="menu-emoji">${getEmoji(name)}</span>
+          <div class="menu-name">${name}</div>
+        </div>`).join('');
+      if (row.CAL_INFO) grid.innerHTML += `<div class="kcal-row">🔥 총 열량 ${row.CAL_INFO}</div>`;
+      setBadge('meal-badge','NEIS 연결됨','ok');
+    } else {
+      grid.innerHTML='<div class="no-data" style="grid-column:1/6">오늘 급식 정보가 없습니다</div>';
+      setBadge('meal-badge','데이터 없음','err');
+    }
+  } catch(e) {
+    document.getElementById('menu-grid').innerHTML=
+      '<div class="no-data" style="grid-column:1/6">급식 정보를 불러올 수 없습니다</div>';
+    setBadge('meal-badge','연결 오류','err');
+  }
+}
+
+async function fetchWeather() {
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=37.7383&longitude=127.0450`+
+      `&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,wind_speed_10m&timezone=Asia%2FSeoul`;
+    const c = (await (await fetch(url)).json()).current;
+    const code = c.weather_code;
+    let emoji='🌤️', desc='맑음';
+    if(code===0)      {emoji='☀️';  desc='맑음';}
+    else if(code<=3)  {emoji='⛅';  desc='구름 조금';}
+    else if(code<=48) {emoji='🌫️'; desc='안개';}
+    else if(code<=57) {emoji='🌦️'; desc='이슬비';}
+    else if(code<=67) {emoji='🌧️'; desc='비';}
+    else if(code<=77) {emoji='❄️';  desc='눈';}
+    else if(code<=82) {emoji='🌦️'; desc='소나기';}
+    else              {emoji='⛈️';  desc='뇌우';}
+    document.getElementById('w-emoji').textContent = emoji;
+    document.getElementById('w-temp').textContent  = Math.round(c.temperature_2m)+'°C';
+    document.getElementById('w-desc').textContent  = desc;
+    document.getElementById('w-hum').textContent   = c.relative_humidity_2m+'%';
+    document.getElementById('w-wind').textContent  = c.wind_speed_10m.toFixed(1)+' m/s';
+    document.getElementById('w-feel').textContent  = Math.round(c.apparent_temperature)+'°C';
+    setBadge('w-badge','연결됨','ok');
+  } catch(e) {
+    document.getElementById('w-desc').textContent='날씨 정보를 불러올 수 없습니다';
+    setBadge('w-badge','오류','err');
+    setTimeout(fetchWeather, 30000);
+  }
+}
+
+const EVENTS = [
+  {month:'MAY', day:'15', name:'스승의 날 행사',  detail:'전교생 참여 · 강당'},
+  {month:'MAY', day:'20', name:'체육대회',         detail:'오전 운동장 · 우천 시 연기'},
+  {month:'MAY', day:'23', name:'학부모 상담 주간', detail:'5.23~5.27 · 사전 예약'},
+  {month:'JUN', day:'3',  name:'현장 체험 학습',   detail:'1~2학년 대상'},
+  {month:'JUN', day:'10', name:'독서 골든벨',       detail:'전학년 · 도서관'},
+  {month:'JUN', day:'17', name:'1학기 방학식',     detail:'정오 하교'},
+];
+document.getElementById('events-row').innerHTML = EVENTS.map(e=>
+  `<div class="event-item">
+    <div class="event-date-box">
+      <div class="event-month">${e.month}</div>
+      <div class="event-day">${e.day}</div>
+    </div>
+    <div>
+      <div class="event-name">${e.name}</div>
+      <div class="event-detail">${e.detail}</div>
+    </div>
+  </div>`).join('');
+
+function setBadge(id, text, type) {
+  const el = document.getElementById(id);
+  el.textContent = text; el.className = 'api-badge badge-'+type;
+}
+
+fetchWeather();
+fetchMeal();
+fetchTimetable();
+setInterval(fetchWeather, 10*60*1000);
+setInterval(fetchMeal,    60*60*1000);
+</script>
+</body>
+</html>
