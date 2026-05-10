@@ -50,10 +50,17 @@ body {
 .card {
   background: #fff;
   border-radius: 22px;
-  padding: 22px 24px;
+  padding: 22px 24px 22px 28px;
   box-shadow: 0 2px 16px rgba(37,99,235,0.07), 0 1px 3px rgba(37,99,235,0.05);
   border: 1px solid #e0e9ff;
+  border-left: 7px solid #93c5fd;
 }
+.card.accent-blue   { border-left-color: #2563eb; }
+.card.accent-green  { border-left-color: #16a34a; }
+.card.accent-orange { border-left-color: #ea580c; }
+.card.accent-purple { border-left-color: #7c3aed; }
+.card.accent-pink   { border-left-color: #db2777; }
+
 .card-header {
   display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
 }
@@ -69,8 +76,8 @@ body {
 .icon-pink   { background: #fce7f3; }
 
 .card-title {
-  font-size: 13px; font-weight: 800;
-  letter-spacing: 1px; color: #94a3b8; text-transform: uppercase;
+  font-size: 16px; font-weight: 800;
+  letter-spacing: 0.3px; color: #1e293b;
 }
 .api-badge {
   margin-left: auto; font-size: 11px; font-weight: 800;
@@ -134,6 +141,12 @@ body {
 .period-time { font-size: 11px; color: #b0bcd4; min-width: 72px; font-weight: 700; }
 .period-subject { font-size: 16px; color: #1e293b; font-weight: 800; flex: 1; }
 .period-item.current .period-subject { color: #1d4ed8; }
+.period-item.lunch {
+  background: #fef9c3; border-color: #fbbf24;
+}
+.period-item.lunch .period-subject { color: #92400e; }
+.period-item.lunch .period-num { color: #d97706; }
+.period-item.lunch .period-time { color: #b45309; }
 .now-badge {
   font-size: 10px; background: #2563eb; color: #fff;
   padding: 3px 9px; border-radius: 10px; font-weight: 800;
@@ -231,7 +244,7 @@ body {
 <div class="main-grid">
 
   <!-- 시계 -->
-  <div class="card clock-card">
+  <div class="card clock-card accent-blue">
     <div class="card-header">
       <div class="card-icon-wrap icon-blue">🕐</div>
       <span class="card-title">현재 시각</span>
@@ -242,7 +255,7 @@ body {
   </div>
 
   <!-- 날씨 -->
-  <div class="card weather-card">
+  <div class="card weather-card accent-green">
     <div class="card-header">
       <div class="card-icon-wrap icon-blue">🌤️</div>
       <span class="card-title">오늘 날씨 · 의정부</span>
@@ -263,7 +276,7 @@ body {
   </div>
 
   <!-- 시간표 -->
-  <div class="card timetable-card">
+  <div class="card timetable-card accent-purple">
     <div class="card-header">
       <div class="card-icon-wrap icon-purple">📅</div>
       <span class="card-title">시간표 · 1학년 1반</span>
@@ -275,7 +288,7 @@ body {
   </div>
 
   <!-- 급식 -->
-  <div class="card lunch-card">
+  <div class="card lunch-card accent-orange">
     <div class="card-header">
       <div class="card-icon-wrap icon-orange">🍱</div>
       <span class="card-title">오늘 점심 급식</span>
@@ -287,7 +300,7 @@ body {
   </div>
 
   <!-- 행사 -->
-  <div class="card events-card">
+  <div class="card events-card accent-pink">
     <div class="card-header">
       <div class="card-icon-wrap icon-pink">📢</div>
       <span class="card-title">학교 행사 &amp; 교육 활동</span>
@@ -306,9 +319,9 @@ const CLASS_NM = '1';
 const DAYS     = ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'];
 
 const PERIOD_TIMES = [
-  {s:'08:40',e:'09:30'},{s:'09:40',e:'10:30'},{s:'10:40',e:'11:30'},
-  {s:'11:40',e:'12:30'},{s:'13:20',e:'14:10'},{s:'14:20',e:'15:10'},
-  {s:'15:20',e:'16:10'},
+  {s:'09:15',e:'10:00'},{s:'10:10',e:'10:55'},{s:'11:05',e:'11:50'},
+  {s:'12:00',e:'12:45'},{s:'13:45',e:'14:30'},{s:'14:40',e:'15:25'},
+  {s:'15:35',e:'16:20'},
 ];
 
 function updateClock() {
@@ -326,6 +339,7 @@ updateClock();
 
 function highlightPeriod(now) {
   const cur = now.getHours()*60 + now.getMinutes();
+  const lunchStart = 12*60+45, lunchEnd = 13*60+45;
   PERIOD_TIMES.forEach((t,i) => {
     const el = document.getElementById('period-'+(i+1));
     if (!el) return;
@@ -339,15 +353,25 @@ function highlightPeriod(now) {
       b.className='now-badge'; b.textContent='진행중'; el.appendChild(b);
     } else if (!active && badge) badge.remove();
   });
+  const lunchEl = document.getElementById('lunch-period');
+  if (lunchEl) {
+    const isLunch = cur >= lunchStart && cur < lunchEnd;
+    lunchEl.className = 'period-item lunch' + (isLunch ? ' current' : '');
+    const badge = lunchEl.querySelector('.now-badge');
+    if (isLunch && !badge) {
+      const b = document.createElement('span');
+      b.className='now-badge'; b.style.background='#d97706'; b.textContent='점심'; lunchEl.appendChild(b);
+    } else if (!isLunch && badge) badge.remove();
+  }
 }
 
 function renderDefaultTimetable() {
-  document.getElementById('periods').innerHTML = PERIOD_TIMES.map((t,i)=>
-    `<div class="period-item" id="period-${i+1}">
-      <span class="period-num">${i+1}</span>
-      <span class="period-time">${t.s}~${t.e}</span>
-      <span class="period-subject" style="color:#cbd5e1">-</span>
-    </div>`).join('');
+  let html = '';
+  PERIOD_TIMES.forEach((t,i)=>{
+    if (i===4) html += `<div class="period-item lunch" id="lunch-period"><span class="period-num">🍱</span><span class="period-time">12:45~13:45</span><span class="period-subject">점심시간</span></div>`;
+    html += `<div class="period-item" id="period-${i+1}"><span class="period-num">${i+1}</span><span class="period-time">${t.s}~${t.e}</span><span class="period-subject" style="color:#cbd5e1">-</span></div>`;
+  });
+  document.getElementById('periods').innerHTML = html;
 }
 
 async function fetchTimetable() {
@@ -363,16 +387,14 @@ async function fetchTimetable() {
       const data = await (await fetch(url)).json();
       const rows = data?.misTimetable?.[1]?.row;
       if (rows && rows.length) {
-        document.getElementById('periods').innerHTML = rows
-          .sort((a,b)=>parseInt(a.PERIO)-parseInt(b.PERIO))
-          .map(r=>{
-            const p=parseInt(r.PERIO), t=PERIOD_TIMES[p-1]||{s:'',e:''};
-            return `<div class="period-item" id="period-${p}">
-              <span class="period-num">${p}</span>
-              <span class="period-time">${t.s}~${t.e}</span>
-              <span class="period-subject">${r.ITRT_CNTNT}</span>
-            </div>`;
-          }).join('');
+        const sorted = rows.sort((a,b)=>parseInt(a.PERIO)-parseInt(b.PERIO));
+        let html = '';
+        sorted.forEach(r=>{
+          const p=parseInt(r.PERIO), t=PERIOD_TIMES[p-1]||{s:'',e:''};
+          if (p===5) html += `<div class="period-item lunch" id="lunch-period"><span class="period-num">🍱</span><span class="period-time">12:45~13:45</span><span class="period-subject">점심시간</span></div>`;
+          html += `<div class="period-item" id="period-${p}"><span class="period-num">${p}</span><span class="period-time">${t.s}~${t.e}</span><span class="period-subject">${r.ITRT_CNTNT}</span></div>`;
+        });
+        document.getElementById('periods').innerHTML = html;
         setBadge('tt-badge','NEIS 연결됨','ok');
         highlightPeriod(new Date()); return;
       }
